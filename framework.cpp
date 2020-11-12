@@ -237,8 +237,6 @@ framework::framework()
 		KEYS[i] = false;
 	}
 
-
-
 	window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, BOARD_WIDTH * TILESIZE, BOARD_HEIGHT * TILESIZE, 0);
 	render = SDL_CreateRenderer(window, -1, 0);
 
@@ -254,10 +252,10 @@ framework::framework()
 	{
 		for (unsigned int j = 0; j <= BOARD_WIDTH - 1; j++)
 		{
-			squares[j][i].x = i * TILESIZE;
-			squares[j][i].y = j * TILESIZE;
-			squares[j][i].w = TILESIZE;
-			squares[j][i].h = TILESIZE;
+			squares[i][j].x = j * TILESIZE;
+			squares[i][j].y = i * TILESIZE;
+			squares[i][j].w = TILESIZE;
+			squares[i][j].h = TILESIZE;
 		}
 	}
 
@@ -297,18 +295,18 @@ void framework::input()
 void framework::clearlines()
 {
 	bool clear = true;
-	for (unsigned int i = 0; i <= BOARD_WIDTH - 1; i++)
+	for (unsigned short i = 0; i <= BOARD_WIDTH - 1; i++)
 	{
-		if (board_matrix[i][BOARD_HEIGHT - 1] != 3)
+		if (board_matrix[BOARD_HEIGHT - 1][i] != 3)
 		{
-			bool clear = false;
+			clear = false;
 			break;
 		}
 	}
 	if (clear == true) {
-		for (unsigned int j = 0; j <= BOARD_WIDTH - 1; j++)
+		for (unsigned short j = 0; j <= BOARD_WIDTH - 1; j++)
 		{
-			board_matrix[j][BOARD_HEIGHT - 1] = 0;
+			board_matrix[BOARD_HEIGHT - 1][j] = 0;
 		}
 		shiftdown();
 	}
@@ -330,7 +328,7 @@ void framework::draw()
 	{
 		for (short j = BOARD_WIDTH - 1; j >= 0; j--)
 		{
-			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2)
+			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i][j] == 3)
 			{
 				SDL_SetRenderDrawColor(render, 255, 124, 0, 255);
 				SDL_RenderFillRect(render, &squares[j][i]);
@@ -347,7 +345,7 @@ void framework::shiftdown()
 	{
 		for (short j = BOARD_WIDTH - 1; j >= 0; j--)
 		{
-			board_matrix[i][j] = board_matrix[i][j - 1];
+			board_matrix[i][j] = board_matrix[i - 1][j];
 		}
 	}
 }
@@ -361,7 +359,7 @@ void framework::shiftcurrentpiecedown()
 		{
 			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2)
 			{
-				if (board_matrix[i][j + 1] == 3 || j + 1 == BOARD_WIDTH - 1)
+				if (board_matrix[i + 1][j] == 3 || i + 1 == BOARD_WIDTH - 1)
 				{
 					possible = false;
 					settle();
@@ -375,9 +373,16 @@ void framework::shiftcurrentpiecedown()
 		{
 			for (short j = BOARD_WIDTH - 1; j >= 0; j--)
 			{
-				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i-1][j] == 1 || board_matrix[i-1][j] == 2)
+				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i + 1][j] == 1 || board_matrix[i + 1][j] == 2)
 				{
-					board_matrix[i][j] = board_matrix[i-1][j];
+					if (i > 0 && i < BOARD_HEIGHT - 1)
+					{
+						board_matrix[i][j] = board_matrix[i - 1][j];
+					}
+					else
+					{
+						board_matrix[i][j] = 0;
+					}
 				}
 			}
 		}
@@ -391,15 +396,15 @@ void framework::rotatecurrentpiece()
 	{
 		currentpiece.rotation = 1;
 	}
-	for (unsigned short i = BOARD_HEIGHT - 1; i >= 0; i--)
+	for (short i = BOARD_HEIGHT - 1; i >= 0; i--)
 	{
-		for (unsigned short j = BOARD_WIDTH - 1; j >= 0; j--)
+		for (short j = BOARD_WIDTH - 1; j >= 0; j--)
 		{
 			if (board_matrix[i][j] == 2)
 			{
-				for (unsigned short k = i - 2; k >= 0; k--)
+				for (short k = i - 2; k >= 0; k--)
 				{
-					for (unsigned short n = j - 2; n >= 0; n--)
+					for (short n = j - 2; n >= 0; n--)
 					{
 						board_matrix[n][k] = mPieces[currentpiece.piece_type][currentpiece.rotation][n][k];
 					}
@@ -420,7 +425,7 @@ void framework::newpiece()
 	{
 		for (short n = y - 6; n >= 0; n--)
 		{
-			board_matrix[k][n] = mPieces[currentpiece.piece_type][currentpiece.rotation][k][n];
+			board_matrix[n][k] = mPieces[currentpiece.piece_type][currentpiece.rotation][n][k];
 		}
 	}
 }
@@ -428,21 +433,32 @@ void framework::newpiece()
 void framework::settle()
 {
 	bool settled = false;
-	for (short i = BOARD_HEIGHT - 1; i >= 0; i--)
+	for (short i = 19; i >= 0; i--)
 	{
-		for (short j = BOARD_WIDTH - 1; j >= 0; j--)
+		for (short j = 9; j >= 0; j--)
 		{
 			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2)
 			{
-				if (board_matrix[i][j + 1] == 3 || i == BOARD_HEIGHT - 1)
+				if (board_matrix[i + 1][j] == 3 || i == BOARD_HEIGHT - 1)
 				{
-					board_matrix[i][j] = 3;
 					settled = true;
+					break;
 				}
 			}
 		}
 	}
-	if (settled == true) {
+	if (settled == true)
+	{
+		for (short i = BOARD_HEIGHT - 1; i >= 0; i--)
+		{
+			for (short j = BOARD_WIDTH - 1; j >= 0; j--)
+			{
+				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2)
+				{
+					board_matrix[i][j] = 3;
+				}
+			}
+		}
 		currentpiece.piece_type = NULL;
 		currentpiece.rotation = NULL;
 		newpiece();

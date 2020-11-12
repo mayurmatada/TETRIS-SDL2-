@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <vector>
 
-#define BOARD_LINE_WIDTH 6          
-#define BLOCK_SIZE 16               
-#define BOARD_POSITION 320          
-#define BOARD_WIDTH 10              
-#define BOARD_HEIGHT 20             
-#define MIN_VERTICAL_MARGIN 20      
-#define MIN_HORIZONTAL_MARGIN 20    
-#define PIECE_BLOCKS 5 
+#define BOARD_LINE_WIDTH 6
+#define BLOCK_SIZE 16
+#define BOARD_POSITION 320
+#define BOARD_WIDTH 10
+#define BOARD_HEIGHT 20
+#define MIN_VERTICAL_MARGIN 20
+#define MIN_HORIZONTAL_MARGIN 20
+#define PIECE_BLOCKS 5
 #define TILESIZE 30
 
 extern const unsigned short mPieces[7 /*kind */][4 /* rotation */][5 /* horizontal blocks */][5 /* vertical blocks */];
@@ -32,8 +32,8 @@ public:
 	void draw();
 	SDL_Window* window;
 	SDL_Renderer* render;
-	short board_matrix[BOARD_WIDTH][BOARD_HEIGHT];
-	SDL_Rect squares[BOARD_WIDTH][BOARD_HEIGHT];
+	short board_matrix[BOARD_HEIGHT][BOARD_WIDTH];
+	SDL_Rect squares[BOARD_HEIGHT][BOARD_WIDTH];
 	piece currentpiece;
 	bool KEYS[322];
 	void shiftdown();
