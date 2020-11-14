@@ -227,6 +227,19 @@ const unsigned short mPieces[7 /*kind */][4 /* rotation */][5 /* horizontal bloc
 	   }
 };
 
+void framework::newpiece()
+{
+	currentpiece.piece_type = rand() % 7;
+	currentpiece.rotation = rand() % 4;
+	for (short k = 4; k >= 0; k--)
+	{
+		for (short n = 7; n >= 3; n--)
+		{
+			board_matrix[k][n] = mPieces[currentpiece.piece_type][currentpiece.rotation][k][n - 3];
+		}
+	}
+}
+
 framework::framework()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -315,8 +328,11 @@ void framework::clearlines()
 void framework::sequence()
 {
 	shiftcurrentpiecedown();
+	draw();
 	input();
+	draw();
 	settle();
+	draw();
 	clearlines();
 	draw();
 }
@@ -331,7 +347,7 @@ void framework::draw()
 			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i][j] == 3)
 			{
 				SDL_SetRenderDrawColor(render, 255, 124, 0, 255);
-				SDL_RenderFillRect(render, &squares[j][i]);
+				SDL_RenderFillRect(render, &squares[i][j]);
 				SDL_SetRenderDrawColor(render, 0, 0, 0, 255);
 			}
 		}
@@ -359,7 +375,7 @@ void framework::shiftcurrentpiecedown()
 		{
 			if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2)
 			{
-				if (board_matrix[i + 1][j] == 3 || i + 1 == BOARD_WIDTH - 1)
+				if (board_matrix[i + 1][j] == 3 || i == BOARD_HEIGHT - 1)
 				{
 					possible = false;
 					settle();
@@ -369,19 +385,23 @@ void framework::shiftcurrentpiecedown()
 		}
 	}
 	if (possible == true) {
-		for (short i = BOARD_HEIGHT - 1; i >= 0; i--)
+		for (short n = BOARD_HEIGHT - 1; n >= 0; n--)
 		{
-			for (short j = BOARD_WIDTH - 1; j >= 0; j--)
+			for (short k = BOARD_WIDTH - 1; k >= 0; k--)
 			{
-				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i + 1][j] == 1 || board_matrix[i + 1][j] == 2)
+				if (board_matrix[n][k] == 1 || board_matrix[n][k] == 2 || board_matrix[n - 1][k] == 1 || board_matrix[n - 1][k] == 2)
 				{
-					if (i > 0 && i < BOARD_HEIGHT - 1)
+					if (board_matrix[n - 1][k] == 1 || board_matrix[n - 1][k] == 2)
 					{
-						board_matrix[i][j] = board_matrix[i - 1][j];
+						board_matrix[n][k] = board_matrix[n - 1][k];
+					}
+					else if (n > 0 && n < BOARD_HEIGHT - 1)
+					{
+						board_matrix[n][k] = board_matrix[n - 1][k];
 					}
 					else
 					{
-						board_matrix[i][j] = 0;
+						board_matrix[n][k] = 0;
 					}
 				}
 			}
@@ -410,22 +430,6 @@ void framework::rotatecurrentpiece()
 					}
 				}
 			}
-		}
-	}
-}
-
-void framework::newpiece()
-{
-	currentpiece.piece_type = rand() % 7 + 1;
-	currentpiece.rotation = rand() % 4 + 1;
-	int x, y;
-	x = BOARD_WIDTH / 2;
-	y = BOARD_HEIGHT / 2;
-	for (short k = x - 3; k >= 0; k--)
-	{
-		for (short n = y - 6; n >= 0; n--)
-		{
-			board_matrix[n][k] = mPieces[currentpiece.piece_type][currentpiece.rotation][n][k];
 		}
 	}
 }
