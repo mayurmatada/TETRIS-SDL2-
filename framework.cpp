@@ -8,31 +8,31 @@ const unsigned short mPieces[7 /*kind */][4 /* rotation */][5 /* horizontal bloc
 	// Square
 	  {
 	   {
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
 		{0, 0, 2, 1, 0},
 		{0, 0, 1, 1, 0},
+		{0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0}
 		},
 	   {
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
 		{0, 0, 2, 1, 0},
 		{0, 0, 1, 1, 0},
+		{0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0}
 		},
 	   {
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
 		{0, 0, 2, 1, 0},
 		{0, 0, 1, 1, 0},
+		{0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0}
 		},
 	   {
-		{0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0},
 		{0, 0, 2, 1, 0},
 		{0, 0, 1, 1, 0},
+		{0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0}
 		}
 	   },
@@ -40,18 +40,18 @@ const unsigned short mPieces[7 /*kind */][4 /* rotation */][5 /* horizontal bloc
 	// I
 	  {
 	   {
-		{0, 0, 0, 0, 0},
+		{0, 1, 2, 1, 1},
 		{0, 0, 0, 0, 0},
 		{0, 1, 2, 1, 1},
 		{0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0}
 		},
 	   {
-		{0, 0, 0, 0, 0},
 		{0, 0, 1, 0, 0},
 		{0, 0, 2, 0, 0},
 		{0, 0, 1, 0, 0},
-		{0, 0, 1, 0, 0}
+		{0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 0}
 		},
 	   {
 		{0, 0, 0, 0, 0},
@@ -245,10 +245,6 @@ framework::framework()
 	SDL_Init(SDL_INIT_EVERYTHING);
 	srand(time(NULL));
 
-	for (int i = 0; i < 322; i++)
-	{
-		KEYS[i] = false;
-	}
 
 	window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, BOARD_WIDTH * TILESIZE, BOARD_HEIGHT * TILESIZE, 0);
 	render = SDL_CreateRenderer(window, -1, 0);
@@ -285,23 +281,34 @@ void framework::input()
 {
 	bool action = false;
 	SDL_Event e;
-	switch (SDL_PollEvent(&e))
+	while(SDL_PollEvent(&e))
 	{
-	case SDL_QUIT:
-		SDL_DestroyRenderer(render);
-		SDL_DestroyWindow(window);
-	case SDL_KEYDOWN:
-		KEYS[e.key.keysym.sym] = true;
-		action = true;
-		break;
-	case SDL_KEYUP:
-		KEYS[e.key.keysym.sym] = false;
-		action = true;
-		break;
-	}
-	if (action == true)
-	{
-		handleInput();
+		switch (e.type)
+		{
+		case SDL_QUIT:
+			SDL_DestroyRenderer(render);
+			SDL_DestroyWindow(window);
+		case SDL_KEYDOWN:
+			switch (e.key.keysym.sym)
+			{
+			case SDLK_LEFT:
+				shiftcurrentpieceleft();
+				break;
+			case SDLK_RIGHT:
+				shiftcurrentpieceright();
+				break;
+			case SDLK_DOWN:
+				slampiece();
+				break;
+			case SDLK_z:
+				rotatecurrentpiece();
+				break;
+			default:
+				break;
+			}
+		default:
+			break;
+		}
 	}
 }
 
@@ -477,25 +484,7 @@ void framework::slampiece()
 	}
 }
 
-void framework::handleInput()
-{
-	if (KEYS[SDLK_RIGHT])
-	{
-		shiftcurrentpiecedown();
-	}
-	if (KEYS[SDLK_LEFT])
-	{
-		shiftcurrentpieceleft();
-	}
-	if (KEYS[SDLK_z])
-	{
-		slampiece();
-	}
-	if (KEYS[SDLK_x])
-	{
-		rotatecurrentpiece();
-	}
-}
+
 
 void framework::shiftcurrentpieceright()
 {
@@ -520,9 +509,9 @@ void framework::shiftcurrentpieceright()
 		{
 			for (short j = BOARD_WIDTH - 1; j >= 0; j--)
 			{
-				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i - 1][j] == 1 || board_matrix[i - 1][j] == 2)
+				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i][j-1] == 1 || board_matrix[i][j-1] == 2)
 				{
-					board_matrix[i][j] = board_matrix[i - 1][j];
+					board_matrix[i][j] = board_matrix[i][j-1];
 				}
 			}
 		}
@@ -553,9 +542,9 @@ void framework::shiftcurrentpieceleft()
 		{
 			for (short j = 0; j <= BOARD_WIDTH - 1; j++)
 			{
-				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i + 1][j] == 1 || board_matrix[i + 1][j] == 2)
+				if (board_matrix[i][j] == 1 || board_matrix[i][j] == 2 || board_matrix[i][j+1] == 1 || board_matrix[i][j+1] == 2)
 				{
-					board_matrix[i][j] = board_matrix[i + 1][j];
+					board_matrix[i][j] = board_matrix[i][j+1];
 				}
 			}
 		}

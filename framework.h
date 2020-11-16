@@ -35,7 +35,6 @@ public:
 	short board_matrix[BOARD_HEIGHT][BOARD_WIDTH];
 	SDL_Rect squares[BOARD_HEIGHT][BOARD_WIDTH];
 	piece currentpiece;
-	bool KEYS[322];
 	void shiftdown();
 	void shiftcurrentpiecedown();
 	void rotatecurrentpiece();
